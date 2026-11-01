@@ -1,19 +1,25 @@
-# Stateless deployment: no volumes, no published ports. Traffic arrives only through the Cloudflare tunnel.
+# Stateless deployment: no volumes, no published ports.
+#
+# Standalone (this stack brings its own Cloudflare tunnel):
+#   docker compose --profile tunnel up -d --build        (needs TUNNEL_TOKEN in .env)
+# On a host that already runs a cloudflared container (attach to its network instead):
+#   docker compose -f docker-compose.yml -f docker-compose.shared-tunnel.yml up -d --build
 services:
-  app:
+  carwale-explorer:   # unique name: it becomes a DNS name on any network it joins
     build: .
     restart: unless-stopped
     read_only: true          # nothing can be written to the container filesystem
     tmpfs: [/tmp]
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
-    mem_limit: 256m
+    mem_limit: 128m
     expose: ["8000"]
 
   cloudflared:
+    profiles: [tunnel]
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
     command: tunnel --no-autoupdate run
     environment:
-      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?set TUNNEL_TOKEN in .env}
-    depends_on: [app]
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on: [carwale-explorer]
