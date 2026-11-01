@@ -37,7 +37,7 @@ CACHE_TTL = 3600
 # CARWALE_CACHE=memory keeps the page cache in RAM only (used by the stateless web server);
 # otherwise pages are cached on disk for an hour.
 MEMORY_CACHE = os.environ.get("CARWALE_CACHE") == "memory"
-CACHE_DIR = Path.home() / ".cache" / "carwale-explorer"
+CACHE_DIR = Path.home() / ".cache" / "cars-explorer"
 _mem = collections.OrderedDict()  # url -> (time, html); small LRU because pages are large
 _MEM_MAX = 40
 _mem_lock = threading.Lock()

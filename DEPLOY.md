@@ -6,7 +6,7 @@ and preferences live in their own browser (IndexedDB + localStorage).
 
 ## Steps (own tunnel)
 1. Cloudflare Zero Trust > Networks > Tunnels > create a tunnel, copy its token.
-2. In the tunnel's *Public hostname* tab add your domain/subdomain with service `http://carwale-explorer:8000`.
+2. In the tunnel's *Public hostname* tab add your domain/subdomain with service `http://cars-explorer:8000`.
 3. On the VPS: `cp .env.example .env`, paste the token, then `docker compose --profile tunnel up -d --build`.
 4. Cloudflare dashboard > Security > WAF > Rate limiting: limit `/api/*` (e.g. 60 requests/min per IP).
    Every API call makes the VPS hit carwale.com, so this protects both you and CarWale.
@@ -15,7 +15,7 @@ and preferences live in their own browser (IndexedDB + localStorage).
 1. `docker compose -f docker-compose.yml -f docker-compose.shared-tunnel.yml up -d --build`. This joins the
    existing tunnel's network (`tvbox_default`) without touching the other containers.
 2. In Zero Trust > Networks > Tunnels > (that tunnel) > Public hostname, add the subdomain with service
-   `HTTP` and URL `carwale-explorer:8000`. Keep the service name unique on the shared network.
+   `HTTP` and URL `cars-explorer:8000`. Keep the service name unique on the shared network.
 3. Add the rate-limit rule as above.
 
 ## Privacy and limits

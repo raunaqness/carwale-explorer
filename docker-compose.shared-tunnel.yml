@@ -1,8 +1,8 @@
 # Override for a host that already runs cloudflared on the Docker network `tvbox_default`.
-# Joins that network so the existing tunnel can reach this app as http://carwale-explorer:8000.
+# Joins that network so the existing tunnel can reach this app as http://cars-explorer:8000.
 # Does not touch or restart any other container.
 services:
-  carwale-explorer:
+  cars-explorer:
     networks: [default, tunnel]
 
 networks:

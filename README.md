@@ -1,8 +1,8 @@
-# carwale-explorer
+# cars-explorer
 
 Fetch car details from [carwale.com](https://www.carwale.com) (models, variants, specs, features, prices, user and expert reviews, brochures) and build comparison reports from them.
 
-CarWale has no public API. Each page embeds its data as JSON (`window.__INITIAL_STATE__`), which `carwale.py` reads. If CarWale changes its pages, parsing may break. Check CarWale's terms of use before heavy or commercial use. Responses are cached for an hour in `~/.cache/carwale-explorer`.
+CarWale has no public API. Each page embeds its data as JSON (`window.__INITIAL_STATE__`), which `carwale.py` reads. If CarWale changes its pages, parsing may break. Check CarWale's terms of use before heavy or commercial use. Responses are cached for an hour in `~/.cache/cars-explorer`.
 
 Requires Python 3.9+. No dependencies. Run everything from the repo root.
 

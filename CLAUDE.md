@@ -1,4 +1,4 @@
-# carwale-explorer: project context
+# cars-explorer: project context
 
 Tool and dataset for fetching car details from carwale.com, comparing variants, and (planned) a frontend. See `README.md` for usage. This file records the decisions and gotchas from the session that built it, so a fresh session can continue.
 
@@ -23,7 +23,7 @@ Tool and dataset for fetching car details from carwale.com, comparing variants, 
 
 ## Gotchas
 - The cloud sandbox network policy needed these hosts allowed: `www.carwale.com` (pages) and `stc.aeplcdn.com` (brochure PDFs). Without the second, brochure downloads fail with 403 (the failure is recorded in `details.json`).
-- CarWale needs a browser-like `User-Agent`; the CLI sets one. Responses are cached for an hour in `~/.cache/carwale-explorer`.
+- CarWale needs a browser-like `User-Agent`; the CLI sets one. Responses are cached for an hour in `~/.cache/cars-explorer`.
 - Pages can change; if parsing breaks, inspect `window.__INITIAL_STATE__` (keys seen: `modelPage`, `makePage`, `userReviewListing`, `priceInCityPage`, `newCars`).
 - Review pagination uses `?page=N`. City prices come from `/<brand>-cars/<model>/price-in-<city>/` (`priceInCityPage.versions[].priceOverview`, joined to saved variants by `versionId`).
 - Refresh data: `python3 carwale.py download <brand> <model> --city bangalore`, then rerun the two scripts. Run everything from the repo root.

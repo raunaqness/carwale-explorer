@@ -1,3 +1,5 @@
+name: cars-explorer
+
 # Stateless deployment: no volumes, no published ports.
 #
 # Standalone (this stack brings its own Cloudflare tunnel):
@@ -5,7 +7,8 @@
 # On a host that already runs a cloudflared container (attach to its network instead):
 #   docker compose -f docker-compose.yml -f docker-compose.shared-tunnel.yml up -d --build
 services:
-  carwale-explorer:   # unique name: it becomes a DNS name on any network it joins
+  cars-explorer:   # unique name: it becomes a DNS name on any network it joins
+    container_name: cars-explorer
     build: .
     restart: unless-stopped
     read_only: true          # nothing can be written to the container filesystem
@@ -22,4 +25,4 @@ services:
     command: tunnel --no-autoupdate run
     environment:
       TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
-    depends_on: [carwale-explorer]
+    depends_on: [cars-explorer]

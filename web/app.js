@@ -28,7 +28,7 @@ function checkboxes(el, values, set, label = (v) => v) {
 // ---- browser storage: saved cars in IndexedDB, small preferences in localStorage
 const DB = (() => {
   const open = () => new Promise((res, rej) => {
-    const r = indexedDB.open("carwale-explorer", 1);
+    const r = indexedDB.open("cars-explorer", 1);
     r.onupgradeneeded = () => r.result.createObjectStore("cars", { keyPath: "id" });
     r.onsuccess = () => res(r.result);
     r.onerror = () => rej(r.error);
