@@ -14,7 +14,6 @@ let city = { slug: "bangalore", name: "Bangalore" };
 const $ = (id) => document.getElementById(id);
 const lakh = (n) => (n ? `₹${(n / 1e5).toFixed(2)} L` : "n/a");
 const uniq = (arr) => [...new Set(arr.filter(Boolean))].sort();
-const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const gearGroup = (g) => (g || "").split(" ")[0]; // Automatic / Manual / Clutchless...
 
 function checkboxes(el, values, set, label = (v) => v) {
@@ -25,32 +24,9 @@ function checkboxes(el, values, set, label = (v) => v) {
   };
 }
 
-// ---- browser storage: saved cars in IndexedDB, small preferences in localStorage
-const DB = (() => {
-  const open = () => new Promise((res, rej) => {
-    const r = indexedDB.open("cars-explorer", 1);
-    r.onupgradeneeded = () => r.result.createObjectStore("cars", { keyPath: "id" });
-    r.onsuccess = () => res(r.result);
-    r.onerror = () => rej(r.error);
-  });
-  const run = async (mode, fn) => {
-    const db = await open();
-    return new Promise((res, rej) => {
-      const tx = db.transaction("cars", mode), store = tx.objectStore("cars");
-      const req = fn(store);
-      tx.oncomplete = () => res(req && req.result);
-      tx.onerror = tx.onabort = () => rej(tx.error);
-    });
-  };
-  return {
-    all: () => run("readonly", (s) => s.getAll()),
-    put: (car) => run("readwrite", (s) => s.put(car)),
-    putAll: (list) => run("readwrite", (s) => list.forEach((c) => s.put(c))),
-    clear: () => run("readwrite", (s) => s.clear()),
-  };
-})();
+// ---- small preferences (selected city, hidden cars) live in localStorage; saved cars in IndexedDB (storage.js)
 const prefs = {
-  get: () => { try { return JSON.parse(localStorage.getItem("cwx-prefs")) || {}; } catch { return {}; } },
+  get: readPrefs,
   save: () => localStorage.setItem("cwx-prefs", JSON.stringify({ city: city.slug, hidden: [...state.hidden] })),
 };
 
@@ -82,7 +58,7 @@ function buildCars() {
   return saved.map((c) => {
     const l = c.overview.launched || "";
     const year = /^\d\d\/\d\d\/\d{4}/.test(l) ? l.slice(6, 10) : /^\d{4}/.test(l) ? l.slice(0, 4) : null;
-    return { name: c.overview.name, image: c.overview.image, year };
+    return { id: c.id, name: c.overview.name, image: c.overview.image, year };
   }).sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -229,21 +205,17 @@ function renderCars() {
   $("cars").innerHTML = cars.map((c) => {
     const hid = state.hidden.has(c.name);
     return `<div class="car${state.cars.has(c.name) ? " on" : ""}${hid ? " hidden" : ""}" data-name="${esc(c.name)}">
-    ${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<span class="noimg"></span>`}
-    <span class="car-name">${esc(c.name)}</span>${c.year ? `<span class="car-year">${esc(c.year)}</span>` : ""}
+    <a class="car-link" href="car.html?id=${encodeURIComponent(c.id)}" target="_blank" rel="noopener" title="Open ${esc(c.name)} details in a new tab">
+      ${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<span class="noimg"></span>`}
+      <span class="car-name">${esc(c.name)}</span>${c.year ? `<span class="car-year">${esc(c.year)}</span>` : ""}
+    </a>
     <button type="button" class="car-x">${hid ? "Show" : "Hide"}</button></div>`;
   }).join("");
-  $("cars").querySelectorAll(".car-x").forEach((x) => (x.onclick = (e) => {
-    e.stopPropagation();
+  $("cars").querySelectorAll(".car-x").forEach((x) => (x.onclick = () => {
     const n = x.parentElement.dataset.name;
     state.hidden.has(n) ? state.hidden.delete(n) : state.hidden.add(n);
     prefs.save();
     render();
-  }));
-  $("cars").querySelectorAll(".car").forEach((b) => (b.onclick = () => {
-    if (state.hidden.has(b.dataset.name)) return;
-    const box = [...document.querySelectorAll("#f-car input")].find((i) => i.value === b.dataset.name);
-    if (box) { box.checked = !box.checked; box.dispatchEvent(new Event("change", { bubbles: true })); }
   }));
 }
 

@@ -32,8 +32,21 @@ dialog { width: 460px; max-width: 95vw; border: 1px solid #ccc; border-radius: 8
 .car-name { font-weight: 600; font-size: 13px; }
 .car-year { color: #777; font-size: 12px; }
 select { width: 100%; padding: 4px; margin-bottom: 6px; font-size: 13px; }
-.car { cursor: pointer; }
+.car { cursor: default; }
 .car-x { margin-top: 4px; padding: 2px 14px; font-size: 12px; background: #fff; border: 1px solid #ccc; border-radius: 4px; color: #333; }
 .car-x:hover { background: #f3f3f3; }
 .car.hidden { cursor: default; }
 .car.hidden img, .car.hidden .car-name, .car.hidden .car-year { opacity: .35; filter: grayscale(1); }
+.car-link { display: flex; flex-direction: column; align-items: center; gap: 2px; color: inherit; text-decoration: none; }
+.car-link:hover .car-name { text-decoration: underline; }
+.back { display: inline-block; margin-bottom: 10px; color: #1a56db; text-decoration: none; font-size: 13px; }
+#hero { display: flex; gap: 16px; align-items: center; margin-bottom: 10px; }
+#hero img { width: 180px; height: 101px; object-fit: contain; }
+#hero h2 { margin: 0 0 4px; font-size: 20px; }
+table.detail th.rowh { position: sticky; left: 0; background: #fafafa; z-index: 1; text-align: left; min-width: 220px; font-weight: 500; cursor: default; }
+table.detail thead th { top: 0; z-index: 2; cursor: default; white-space: normal; min-width: 150px; max-width: 190px; vertical-align: bottom; }
+table.detail thead th.corner { left: 0; z-index: 3; }
+table.detail tr.sect th { position: static; background: #e8eefc; color: #1a3a8a; cursor: default; }
+table.detail td { text-align: left; }
+table.detail td.num { text-align: left; font-weight: 600; }
+table.detail th.rowh { top: auto; }
