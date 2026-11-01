@@ -8,10 +8,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
+# Starter cars shipped to every new visitor (folder names under data/cars/). Other saved cars stay on disk.
+STARTER = ["hyundai-venue", "kia-sonet", "skoda-kylaq", "honda-amaze"]
+
 
 def main():
     cars = []
     for d in sorted((ROOT / "data" / "cars").iterdir()):
+        if d.name not in STARTER:
+            continue
         f, pf = d / "details.json", d / "prices-bangalore.json"
         if not f.exists() or not pf.exists():
             continue
