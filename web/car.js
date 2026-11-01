@@ -1,6 +1,7 @@
 const $ = (id) => document.getElementById(id);
 const lakh = (n) => (n ? `₹${(n / 1e5).toFixed(2)} L` : "n/a");
 const sel = { transmission: new Set(), fuel: new Set() };
+const hidden = new Set(), collapsed = new Set(); // variant ids hidden entirely / shrunk to a narrow strip
 let car, variants, cityName, cityPrices;
 
 // Spec/feature rows shown for every variant; ones already shown as specs are not repeated as features.
@@ -12,11 +13,12 @@ async function loadCar(id) {
   return c;
 }
 
-function cellHtml(v) {
-  if (v === undefined || v === "" || v === "0") return `<td class="no">–</td>`;
-  if (v === "Yes") return `<td class="yes">✓</td>`;
-  if (v === "No") return `<td class="no">No</td>`;
-  return `<td>${esc(v)}</td>`;
+function cellHtml(v, c) {
+  if (c.includes(" col")) return `<td class="${c}"></td>`; // collapsed column: keep the shade, hide the value
+  if (v === undefined || v === "" || v === "0") return `<td class="no ${c}">–</td>`;
+  if (v === "Yes") return `<td class="yes ${c}">✓</td>`;
+  if (v === "No") return `<td class="no ${c}">No</td>`;
+  return `<td class="${c}">${esc(v)}</td>`;
 }
 
 function checkboxes(el, values, set) {
@@ -25,11 +27,18 @@ function checkboxes(el, values, set) {
 }
 
 function render() {
-  const shown = variants.filter((v) =>
+  const matching = variants.filter((v) =>
     (!sel.transmission.size || sel.transmission.has(v.specs["Transmission Type"])) &&
     (!sel.fuel.size || sel.fuel.has(v.specs["Fuel Type"])));
-  $("count").textContent = `${shown.length} of ${variants.length} variants`;
-  if (!shown.length) { $("table").innerHTML = ""; $("msg").textContent = "No variants match these filters."; return; }
+  const shown = matching.filter((v) => !hidden.has(v.id));
+  const nHidden = matching.length - shown.length;
+  $("count").textContent = `${shown.length} of ${variants.length} variants` + (nHidden ? ` (${nHidden} hidden)` : "");
+
+  // sidebar list: tick = visible
+  $("f-variants").innerHTML = matching.map((v) =>
+    `<label><input type="checkbox" value="${esc(v.id)}" ${hidden.has(v.id) ? "" : "checked"}> ${esc(v.variant)}</label>`).join("");
+
+  if (!shown.length) { $("table").innerHTML = ""; $("msg").textContent = matching.length ? "All matching variants are hidden." : "No variants match these filters."; return; }
   $("msg").textContent = "";
 
   const keys = (get, skip = () => false) => {
@@ -39,18 +48,38 @@ function render() {
   };
   const specKeys = keys((v) => v.specs);
   const featKeys = keys((v) => v.features, (k) => specKeys.includes(k) || DUP.has(k));
+  const cls = (i, v) => `c${i % 2}${collapsed.has(v.id) ? " col" : ""}`; // alternating shade + collapsed flag
   const section = (label) => `<tr class="sect"><th colspan="${shown.length + 1}">${esc(label)}</th></tr>`;
-  const row = (label, get) => `<tr><th class="rowh">${esc(label)}</th>${shown.map((v) => cellHtml(get(v))).join("")}</tr>`;
+  const row = (label, get) => `<tr><th class="rowh">${esc(label)}</th>${shown.map((v, i) => cellHtml(get(v), cls(i, v))).join("")}</tr>`;
+  const head = (v, i) => {
+    const col = collapsed.has(v.id);
+    return `<th class="vh ${cls(i, v)}"><div class="vh-tools">
+      <button type="button" data-act="collapse" data-id="${esc(v.id)}" title="${col ? "Expand" : "Collapse"} this variant">${col ? "▸" : "◂"}</button>
+      <button type="button" data-act="hide" data-id="${esc(v.id)}" title="Hide this variant">✕</button></div>
+      <div class="vh-name">${esc(v.variant)}</div></th>`;
+  };
+  const price = (label, f) => `<tr><th class="rowh">${esc(label)} (${esc(cityName)})</th>${shown.map((v, i) =>
+    `<td class="num ${cls(i, v)}">${collapsed.has(v.id) ? "" : lakh(f(v))}</td>`).join("")}</tr>`;
 
+  // Header + both price rows live in <thead>, which is sticky, so they stay in view while the rest scrolls.
   $("table").innerHTML =
-    `<thead><tr><th class="rowh corner"></th>${shown.map((v) => `<th class="vh">${esc(v.variant)}</th>`).join("")}</tr></thead><tbody>` +
-    section("Price") +
-    `<tr><th class="rowh">On-road (${esc(cityName)})</th>${shown.map((v) => `<td class="num">${lakh(v.on)}</td>`).join("")}</tr>` +
-    `<tr><th class="rowh">Ex-showroom (${esc(cityName)})</th>${shown.map((v) => `<td class="num">${lakh(v.ex)}</td>`).join("")}</tr>` +
+    `<thead><tr><th class="rowh corner">Variant</th>${shown.map(head).join("")}</tr>` +
+    price("On-road", (v) => v.on) + price("Ex-showroom", (v) => v.ex).replace("<tr>", '<tr class="last">') + `</thead><tbody>` +
     section("Engine and transmission") + specKeys.map((k) => row(k, (v) => v.specs[k])).join("") +
     section("Features") + featKeys.map((k) => row(k, (v) => v.features[k])).join("") +
     `</tbody>`;
 }
+
+$("table").onclick = (e) => {
+  const b = e.target.closest("button[data-act]");
+  if (!b) return;
+  const id = b.dataset.id;
+  if (b.dataset.act === "hide") hidden.add(id);
+  else collapsed.has(id) ? collapsed.delete(id) : collapsed.add(id);
+  render();
+};
+$("f-variants").onchange = (e) => { e.target.checked ? hidden.delete(e.target.value) : hidden.add(e.target.value); render(); };
+$("show-all").onclick = () => { hidden.clear(); collapsed.clear(); render(); };
 
 async function boot() {
   const id = new URLSearchParams(location.search).get("id") || "";
@@ -71,7 +100,7 @@ async function boot() {
     <div class="muted">${[o.rating ? `★ ${esc(o.rating)}${o.review_count ? ` (${esc(o.review_count)} reviews)` : ""}` : "", esc(o.price_range || ""),
       o.brochure ? `<a href="${esc(o.brochure)}" target="_blank" rel="noopener noreferrer">Brochure (PDF)</a>` : ""].filter(Boolean).join(" · ")}</div></div>`;
 
-  variants = car.variants.map((v) => ({ ...v, on: (cityPrices[v.id] || [])[0], ex: (cityPrices[v.id] || [])[1] }))
+  variants = car.variants.map((v) => ({ ...v, id: String(v.id), on: (cityPrices[v.id] || [])[0], ex: (cityPrices[v.id] || [])[1] }))
     .sort((a, b) => (a.on ?? Infinity) - (b.on ?? Infinity) || a.variant.localeCompare(b.variant));
   const uniq = (f) => [...new Set(variants.map(f).filter(Boolean))].sort();
   checkboxes($("f-transmission"), uniq((v) => v.specs["Transmission Type"]), sel.transmission);

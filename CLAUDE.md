@@ -10,6 +10,7 @@ Tool and dataset for fetching car details from carwale.com, comparing variants, 
 - `reports/creta-automatic-variants.md`: an earlier one-off Creta report (uses average ex-showroom prices, hand-generated; not produced by a script).
 - `web/`: the frontend (plain HTML/JS, no build). Filters on the left, car thumbnails + sortable variant table on the right. All user data (saved cars, per-city prices, hidden cars, selected city) is stored in the visitor's browser (IndexedDB + localStorage); `web/seed.json` ships the starter cars. Has Export/Import/Clear.
 - `scripts/serve.py`: stateless server (serves `web/` + `/api/search|cities|car|prices`). Writes nothing to disk (`CARWALE_CACHE=memory`). `scripts/build_seed.py` regenerates `web/seed.json` from `data/cars/`.
+- `aestudio.studio-DESIGN.md`: design inspiration doc the UI styling (`web/style.css`) is adapted from: warm parchment palette, Georgia headings + system sans, sharp corners, pill secondary buttons, warm shadows. Only the parts that fit a dense data table are used (no 129px hero type or 2-column marketing grid).
 - `Dockerfile`, `docker-compose.yml`, `DEPLOY.md`: VPS + Cloudflare Tunnel deployment; see DEPLOY.md, which also sketches the planned `/api/ask` LLM (OpenRouter) endpoint. Not yet tested with real Docker (not installed locally).
 
 ## Decisions and assumptions (user's wording was ambiguous; revisit if wrong)
