@@ -11,7 +11,7 @@ visitor's browser. The only server-side state is a small in-memory page cache.
 
 Usage: python3 scripts/serve.py [port]
 """
-import argparse, json, os, re, sys, threading
+import argparse, hashlib, json, os, re, sys, threading
 os.environ.setdefault("CARWALE_CACHE", "memory")
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -57,7 +57,27 @@ def car_payload(brand, model):
     }
 
 
+ASSET = re.compile(r'(src|href)="([A-Za-z0-9_./-]+\.(?:js|css))"')
+
+
+def versioned_html(path):
+    """HTML with ?v=<content hash> on local scripts/styles, so a changed file gets a new URL and
+    a stale copy cached at a CDN edge or in a browser can never be paired with newer HTML."""
+    html = path.read_text(encoding="utf-8")
+
+    def add(m):
+        f = (path.parent / m.group(2)).resolve()
+        if f.is_file() and str(f).startswith(str(path.parent)):
+            return f'{m.group(1)}="{m.group(2)}?v={hashlib.md5(f.read_bytes()).hexdigest()[:8]}"'
+        return m.group(0)
+    return ASSET.sub(add, html).encode()
+
+
 class Handler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-cache")  # always revalidate (also stops CDN staleness)
+        super().end_headers()
+
     def translate_path(self, path):
         p = urlparse(path).path
         f = (ROOT / "web" / p.lstrip("/")).resolve()
@@ -79,6 +99,14 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         u = urlparse(self.path)
         if not u.path.startswith("/api/"):
+            f = Path(self.translate_path(self.path))
+            if f.suffix == ".html":
+                body = versioned_html(f)
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                return self.wfile.write(body)
             return super().do_GET()
         q = {k: v[0].strip() for k, v in parse_qs(u.query).items()}
         try:
