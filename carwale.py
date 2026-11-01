@@ -17,7 +17,10 @@ Examples:
 Add --json to any command for machine-readable output.
 """
 import argparse
+import collections
 import hashlib
+import os
+import threading
 import json
 import re
 import sys
@@ -30,8 +33,14 @@ from pathlib import Path
 BASE = "https://www.carwale.com"
 UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/120 Safari/537.36")
-CACHE_DIR = Path.home() / ".cache" / "carwale-explorer"
 CACHE_TTL = 3600
+# CARWALE_CACHE=memory keeps the page cache in RAM only (used by the stateless web server);
+# otherwise pages are cached on disk for an hour.
+MEMORY_CACHE = os.environ.get("CARWALE_CACHE") == "memory"
+CACHE_DIR = Path.home() / ".cache" / "carwale-explorer"
+_mem = collections.OrderedDict()  # url -> (time, html); small LRU because pages are large
+_MEM_MAX = 40
+_mem_lock = threading.Lock()
 
 
 class CarWaleError(Exception):
@@ -41,17 +50,30 @@ class CarWaleError(Exception):
 # --------------------------------------------------------------- fetching
 def fetch_html(path):
     url = path if path.startswith("http") else BASE + path
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    cache = CACHE_DIR / hashlib.sha1(url.encode()).hexdigest()
-    if cache.exists() and time.time() - cache.stat().st_mtime < CACHE_TTL:
-        return cache.read_text(encoding="utf-8")
+    if MEMORY_CACHE:
+        with _mem_lock:
+            hit = _mem.get(url)
+            if hit and time.time() - hit[0] < CACHE_TTL:
+                _mem.move_to_end(url)
+                return hit[1]
+    else:
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        cache = CACHE_DIR / hashlib.sha1(url.encode()).hexdigest()
+        if cache.exists() and time.time() - cache.stat().st_mtime < CACHE_TTL:
+            return cache.read_text(encoding="utf-8")
     req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language": "en-IN,en;q=0.9"})
     last = None
     for attempt in range(3):
         try:
             with urllib.request.urlopen(req, timeout=30) as r:
                 html = r.read().decode("utf-8", "replace")
-            cache.write_text(html, encoding="utf-8")
+            if MEMORY_CACHE:
+                with _mem_lock:
+                    _mem[url] = (time.time(), html)
+                    while len(_mem) > _MEM_MAX:
+                        _mem.popitem(last=False)
+            else:
+                cache.write_text(html, encoding="utf-8")
             return html
         except urllib.error.HTTPError as e:
             if e.code == 404:
@@ -180,6 +202,7 @@ def cmd_model(a):
             {k: x[k] for k in ("fuelType", "transmission", "displacement", "mileageUnit", "arai", "userReportedArai") if x.get(k)}
             for x in mp.get("mileage", [])],
         "brochure": d.get("brochurePath"),
+        "image": ("https://imgd.aeplcdn.com/664x374" + d["imagePath"]) if d.get("imagePath") else None,
         "variants_count": len(mp.get("versions", [])),
         "summary": mp.get("versionTableSummary"),
     }

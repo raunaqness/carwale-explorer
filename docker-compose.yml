@@ -1,0 +1,19 @@
+# Stateless deployment: no volumes, no published ports. Traffic arrives only through the Cloudflare tunnel.
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    read_only: true          # nothing can be written to the container filesystem
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 256m
+    expose: ["8000"]
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?set TUNNEL_TOKEN in .env}
+    depends_on: [app]

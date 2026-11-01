@@ -8,7 +8,9 @@ Tool and dataset for fetching car details from carwale.com, comparing variants, 
 - `scripts/compare.py` -> `reports/automatic-variants-comparison.md`: one table per car, automatic variants only, first row lists everything, later rows list only the differences versus a reference variant (previous variant with the same engine+gearbox, otherwise the base variant).
 - `scripts/under_budget.py [rupees]` -> `reports/variants-under-15-lakh-bangalore.md`: automatic variants with Bangalore on-road price below the limit (default Rs. 15 lakh), laid out compactly for a narrow side panel.
 - `reports/creta-automatic-variants.md`: an earlier one-off Creta report (uses average ex-showroom prices, hand-generated; not produced by a script).
-- `web/`: empty placeholder for the frontend.
+- `web/`: the frontend (plain HTML/JS, no build). Filters on the left, car thumbnails + sortable variant table on the right. All user data (saved cars, per-city prices, hidden cars, selected city) is stored in the visitor's browser (IndexedDB + localStorage); `web/seed.json` ships the starter cars. Has Export/Import/Clear.
+- `scripts/serve.py`: stateless server (serves `web/` + `/api/search|cities|car|prices`). Writes nothing to disk (`CARWALE_CACHE=memory`). `scripts/build_seed.py` regenerates `web/seed.json` from `data/cars/`.
+- `Dockerfile`, `docker-compose.yml`, `DEPLOY.md`: VPS + Cloudflare Tunnel deployment; see DEPLOY.md, which also sketches the planned `/api/ask` LLM (OpenRouter) endpoint. Not yet tested with real Docker (not installed locally).
 
 ## Decisions and assumptions (user's wording was ambiguous; revisit if wrong)
 - "Kia Seros" was taken to mean **Kia Syros**; ".mp file" was taken to mean **Markdown**.
@@ -28,8 +30,7 @@ Tool and dataset for fetching car details from carwale.com, comparing variants, 
 - Brochures add about 57 MB to the repo. Consider ignoring or Git LFS if size becomes a problem.
 
 ## Next steps
-- **Frontend in `web/`** (user wants this later). Simplest: static site that loads `data/cars/*/details.json` and `prices-bangalore.json` (no backend). Live lookup of unsaved cars needs a small API wrapping `carwale.py` functions (`brand_models`, `model_page`, `city_prices`, `variant_row`). Ask the user what views they want first (filters by budget/gearbox/fuel, side-by-side variant diff, etc.).
-- Possibly merge all cars into one consolidated JSON (`data/variants.json`) for the frontend.
+- Build the "ask a question" LLM box (see DEPLOY.md). Port the report's "differences vs previous variant" view to the frontend.
 - Cleanup pending, needs user confirmation: the same CLI also exists in the `carwale-cli/` folder on branch `add-carwale-cli` of `raunaqness/raunaqness.github.io` (about 60 MB of brochures). The user moved to this repo and may want that folder removed.
 
 Origin: built in a Claude Code cloud session, https://claude.ai/code/session_018KkCh3ew9T3AgV4bzktNez

@@ -1,0 +1,409 @@
+{
+  "city": "Bangalore",
+  "area_available": false,
+  "url": "https://www.carwale.com/kia-cars/seltos/price-in-bangalore/",
+  "default_variant_breakup": [
+    {
+      "name": "Ex-Showroom Price",
+      "value": 1124900
+    },
+    {
+      "name": "RTO-Corporate",
+      "value": 191233
+    },
+    {
+      "name": "RTO",
+      "value": 199233
+    },
+    {
+      "name": "Road Safety Tax/Cess",
+      "value": 1000
+    },
+    {
+      "name": "RTO-Bharat",
+      "value": 18786
+    },
+    {
+      "name": "Insurance",
+      "value": 55422
+    },
+    {
+      "name": "Tax Collected at Source (TCS)",
+      "value": 11249
+    },
+    {
+      "name": "FASTag",
+      "value": 500
+    },
+    {
+      "name": "Hypothecation Charges",
+      "value": 1500
+    }
+  ],
+  "variants": [
+    {
+      "id": 22753,
+      "variant": "HTE Petrol 1.5L Manual",
+      "on_road": 1392304,
+      "ex_showroom": 1124900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22807,
+      "variant": "HTE (O) Petrol 1.5L Manual",
+      "on_road": 1546737,
+      "ex_showroom": 1241900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22755,
+      "variant": "HTE Diesel 1.5L Turbo Manual",
+      "on_road": 1610696,
+      "ex_showroom": 1293900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22837,
+      "variant": "HTE (O) Petrol 1.5L Turbo Clutchless Manual (IMT)",
+      "on_road": 1645135,
+      "ex_showroom": 1321900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22757,
+      "variant": "HTK Petrol 1.5L Manual",
+      "on_road": 1669735,
+      "ex_showroom": 1341900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22819,
+      "variant": "HTE (O) Petrol 1.5L Automatic (CVT)",
+      "on_road": 1706635,
+      "ex_showroom": 1371900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22813,
+      "variant": "HTE (O) Diesel 1.5L Turbo Manual",
+      "on_road": 1745994,
+      "ex_showroom": 1403900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22839,
+      "variant": "HTK Petrol 1.5L Turbo Clutchless Manual (IMT)",
+      "on_road": 1753694,
+      "ex_showroom": 1421900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22809,
+      "variant": "HTK (O) Petrol 1.5L Manual",
+      "on_road": 1805033,
+      "ex_showroom": 1451900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22821,
+      "variant": "HTK Petrol 1.5L Automatic (CVT)",
+      "on_road": 1829633,
+      "ex_showroom": 1471900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22759,
+      "variant": "HTK Diesel 1.5L Turbo Manual",
+      "on_road": 1868992,
+      "ex_showroom": 1503900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22841,
+      "variant": "HTK (O) Petrol 1.5L Turbo Clutchless Manual (IMT)",
+      "on_road": 1901587,
+      "ex_showroom": 1530400,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22857,
+      "variant": "HTE (O) Diesel 1.5L Turbo Automatic (TC)",
+      "on_road": 1904046,
+      "ex_showroom": 1532400,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22823,
+      "variant": "HTK (O) Petrol 1.5L Automatic (CVT)",
+      "on_road": 1964931,
+      "ex_showroom": 1581900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22763,
+      "variant": "HTX Petrol 1.5L Manual",
+      "on_road": 1977231,
+      "ex_showroom": 1591900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22815,
+      "variant": "HTK (O) Diesel 1.5L Turbo Manual",
+      "on_road": 2004290,
+      "ex_showroom": 1613900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22859,
+      "variant": "HTK Diesel 1.5L Turbo Automatic (TC)",
+      "on_road": 2028889,
+      "ex_showroom": 1633900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22843,
+      "variant": "HTK (O) Petrol 1.5L Turbo Automatic (DCT)",
+      "on_road": 2063329,
+      "ex_showroom": 1661900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22811,
+      "variant": "HTX (A) Petrol 1.5L Manual",
+      "on_road": 2112529,
+      "ex_showroom": 1701900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22825,
+      "variant": "HTX Petrol 1.5L Automatic (CVT)",
+      "on_road": 2137128,
+      "ex_showroom": 1721900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22861,
+      "variant": "HTK (O) Diesel 1.5L Turbo Automatic (TC)",
+      "on_road": 2164187,
+      "ex_showroom": 1743900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22761,
+      "variant": "HTX Diesel 1.5L Turbo Manual",
+      "on_road": 2176487,
+      "ex_showroom": 1753900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22845,
+      "variant": "HTX Petrol 1.5L Turbo Automatic (DCT)",
+      "on_road": 2235527,
+      "ex_showroom": 1801900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22827,
+      "variant": "HTX (A) Petrol 1.5L Automatic (CVT)",
+      "on_road": 2272426,
+      "ex_showroom": 1831900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22817,
+      "variant": "HTX (A) Diesel 1.5L Turbo Manual",
+      "on_road": 2311785,
+      "ex_showroom": 1863900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22831,
+      "variant": "X-Line Petrol 1.5L Automatic (CVT)",
+      "on_road": 2321626,
+      "ex_showroom": 1871900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22829,
+      "variant": "GTX Petrol 1.5L Automatic (CVT)",
+      "on_road": 2321626,
+      "ex_showroom": 1871900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22863,
+      "variant": "HTX Diesel 1.5L Turbo Automatic (TC)",
+      "on_road": 2336385,
+      "ex_showroom": 1883900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 23041,
+      "variant": "GTX Petrol 1.5L Automatic (CVT) Dual Tone",
+      "on_road": 2346225,
+      "ex_showroom": 1891900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22847,
+      "variant": "HTX (A) Petrol 1.5L Turbo Automatic (DCT)",
+      "on_road": 2370825,
+      "ex_showroom": 1911900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22849,
+      "variant": "GTX Petrol 1.5L Turbo Automatic (DCT)",
+      "on_road": 2420024,
+      "ex_showroom": 1951900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22851,
+      "variant": "X-Line Petrol 1.5L Turbo Automatic (DCT)",
+      "on_road": 2420024,
+      "ex_showroom": 1951900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 23043,
+      "variant": "GTX Petrol 1.5L Turbo Automatic (DCT) Dual Tone",
+      "on_road": 2444624,
+      "ex_showroom": 1971900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22833,
+      "variant": "GTX (A) Petrol 1.5L Automatic (CVT)",
+      "on_road": 2456924,
+      "ex_showroom": 1981900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22835,
+      "variant": "X-Line (A) Petrol 1.5L Automatic (CVT)",
+      "on_road": 2456924,
+      "ex_showroom": 1981900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22865,
+      "variant": "HTX (A) Diesel 1.5L Turbo Automatic (TC)",
+      "on_road": 2471683,
+      "ex_showroom": 1993900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 23045,
+      "variant": "GTX (A) Petrol 1.5L Automatic (CVT) Dual Tone",
+      "on_road": 2479064,
+      "ex_showroom": 1999900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22869,
+      "variant": "X-Line Diesel 1.5L Turbo Automatic (TC)",
+      "on_road": 2479064,
+      "ex_showroom": 1999900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22855,
+      "variant": "X-Line (A) Petrol 1.5L Turbo Automatic (DCT)",
+      "on_road": 2479064,
+      "ex_showroom": 1999900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22853,
+      "variant": "GTX (A) Petrol 1.5L Turbo Automatic (DCT)",
+      "on_road": 2479064,
+      "ex_showroom": 1999900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22867,
+      "variant": "GTX Diesel 1.5L Turbo Automatic (TC)",
+      "on_road": 2479064,
+      "ex_showroom": 1999900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 23049,
+      "variant": "GTX Diesel 1.5L Turbo Automatic (TC) Dual Tone",
+      "on_road": 2526084,
+      "ex_showroom": 2019900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 23047,
+      "variant": "GTX (A) Petrol 1.5L Turbo Automatic (DCT) Dual Tone",
+      "on_road": 2527945,
+      "ex_showroom": 2021400,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22871,
+      "variant": "GTX (A) Diesel 1.5L Turbo Automatic (TC)",
+      "on_road": 2541597,
+      "ex_showroom": 2032400,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 22873,
+      "variant": "X-Line (A) Diesel 1.5L Turbo Automatic (TC)",
+      "on_road": 2541597,
+      "ex_showroom": 2032400,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 23051,
+      "variant": "GTX (A) Diesel 1.5L Turbo Automatic (TC) Dual Tone",
+      "on_road": 2545412,
+      "ex_showroom": 2052400,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 23720,
+      "variant": "GTX (O) Petrol 1.5L Turbo Automatic (DCT)",
+      "on_road": 2696112,
+      "ex_showroom": 2156900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 23722,
+      "variant": "X-Line (O) Petrol 1.5L Turbo Automatic (DCT)",
+      "on_road": 2696112,
+      "ex_showroom": 2156900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 24622,
+      "variant": "GTX (O) Petrol 1.5L Turbo Automatic (DCT) Dual Tone",
+      "on_road": 2724062,
+      "ex_showroom": 2176900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 23724,
+      "variant": "GTX (O) Diesel 1.5L Turbo Automatic (TC)",
+      "on_road": 2727139,
+      "ex_showroom": 2181900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 23726,
+      "variant": "X-Line (O) Diesel 1.5L Turbo Automatic (TC)",
+      "on_road": 2727139,
+      "ex_showroom": 2181900,
+      "label": "On-Road Price"
+    },
+    {
+      "id": 24624,
+      "variant": "GTX (O) Diesel 1.5L Turbo Automatic (TC) Dual Tone",
+      "on_road": 2751961,
+      "ex_showroom": 2201900,
+      "label": "On-Road Price"
+    }
+  ]
+}

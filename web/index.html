@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Car comparison</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<aside id="filters">
+  <h1>Car comparison</h1>
+  <p class="muted">On-road prices from carwale.com</p>
+  <button id="add-car" type="button" class="primary">+ Add a car</button>
+  <button id="reset" type="button">Reset filters</button>
+  <fieldset>
+    <legend>Location (for prices)</legend>
+    <select id="f-state"></select>
+    <select id="f-city"></select>
+    <div id="loc-status" class="muted"></div>
+  </fieldset>
+  <fieldset><legend>Cars</legend><div id="f-car"></div></fieldset>
+  <fieldset><legend>Gearbox</legend><div id="f-gearbox"></div></fieldset>
+  <fieldset><legend>Fuel</legend><div id="f-fuel"></div></fieldset>
+  <fieldset>
+    <legend>Max on-road price: <span id="price-label"></span></legend>
+    <input type="range" id="f-price">
+  </fieldset>
+  <fieldset><legend>Must have (also shown as columns)</legend><div id="f-feature"></div></fieldset>
+  <fieldset>
+    <legend>Your data</legend>
+    <p class="muted">Saved only in this browser. Nothing is stored on the server.</p>
+    <button id="export" type="button">Export</button>
+    <button id="import" type="button">Import</button>
+    <button id="clear" type="button">Clear</button>
+    <input type="file" id="import-file" accept="application/json" hidden>
+  </fieldset>
+</aside>
+<main>
+  <div id="cars" aria-label="Cars"></div>
+  <div id="count" class="muted"></div>
+  <div class="table-wrap"><table id="table"></table></div>
+</main>
+<dialog id="add-dialog">
+  <form method="dialog" class="dlg-head"><strong>Add a car</strong><button>Close</button></form>
+  <input id="q" type="search" placeholder="Search e.g. Hyundai Exter, Tata Nexon" autocomplete="off">
+  <div id="results" class="muted">Type at least 2 characters.</div>
+</dialog>
+<script src="app.js"></script>
+</body>
+</html>
