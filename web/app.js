@@ -1,4 +1,5 @@
 const CORE = [
+  { key: "_cmp", label: "Compare" },
   { key: "car", label: "Car" },
   { key: "variant", label: "Variant" },
   { key: "on_road", label: "On-road", num: true },
@@ -8,7 +9,7 @@ const CORE = [
   { key: "power", label: "Power" },
   { key: "brochure", label: "Brochure" },
 ];
-const state = { cars: new Set(), gearbox: new Set(), fuel: new Set(), features: new Set(), facets: new Map(), hidden: new Set(), maxPrice: 0, sort: { key: "on_road", dir: 1 } };
+const state = { cars: new Set(), gearbox: new Set(), fuel: new Set(), features: new Set(), facets: new Map(), compare: [], hidden: new Set(), maxPrice: 0, sort: { key: "on_road", dir: 1 } };
 let rows = [], cars = [], saved = [], cityList = [];
 let city = { slug: "bangalore", name: "Bangalore" };
 const $ = (id) => document.getElementById(id);
@@ -48,7 +49,8 @@ function buildRows() {
       out.push({ key: `${car.id}:${v.id}`, car: car.overview.name, variant: v.variant,
         on_road: p ? p[0] : null, ex_showroom: p ? p[1] : null,
         fuel: s["Fuel Type"], gearbox: s["Transmission Type"], power: s["Max Engine Power"],
-        brochure: car.overview.brochure || null, features, facets: facetValues(v.features) });
+        brochure: car.overview.brochure || null, features, facets: facetValues(v.features),
+        specs: s, raw: v.features || {} });
     }
   }
   return out;
@@ -239,14 +241,20 @@ function render() {
   $("count").textContent = `${shown.length} of ${rows.length} variants`;
   $("table").innerHTML =
     `<thead><tr>${cols.map((c) => `<th data-k="${c.key}">${esc(c.label)}${key === c.key ? (dir > 0 ? " ▲" : " ▼") : ""}</th>`).join("")}</tr></thead>` +
-    `<tbody>${shown.map((r) => `<tr>${cols.map((c) => cell(r, c)).join("")}</tr>`).join("")}</tbody>`;
+    `<tbody>${shown.map((r) => `<tr${state.compare.includes(r.key) ? ' class="sel"' : ""}>${cols.map((c) => cell(r, c)).join("")}</tr>`).join("")}</tbody>`;
+  renderCompare();
   $("table").querySelectorAll("th").forEach((th) => (th.onclick = () => {
+    if (th.dataset.k === "_cmp") return;
     state.sort = { key: th.dataset.k, dir: state.sort.key === th.dataset.k ? -state.sort.dir : 1 };
     render();
   }));
 }
 
 function cell(r, c) {
+  if (c.key === "_cmp") {
+    const i = state.compare.indexOf(r.key);
+    return `<td class="cmp-cell"><input type="checkbox" data-cmp="${esc(r.key)}"${i >= 0 ? " checked" : ""}${i < 0 && state.compare.length >= CMP_MAX ? " disabled" : ""} aria-label="Compare ${esc(r.car)} ${esc(r.variant)}">${i >= 0 ? `<span class="cmp-tag">${"ABCD"[i]}</span>` : ""}</td>`;
+  }
   if (c.facet) return `<td>${esc(r.facets[c.facet])}</td>`;
   if (c.feat) {
     const v = r.features[c.key];
@@ -258,6 +266,77 @@ function cell(r, c) {
 }
 
 
+
+// ---- compare 2 to 4 variants: tick them in the table, then open the comparison in a modal (the logic lives in compare.js)
+const cmpDlg = $("cmp-dialog");
+const rowByKey = (k) => rows.find((r) => r.key === k);
+const letter = (i) => "ABCD"[i];
+
+$("table").onchange = (e) => {
+  const k = e.target.dataset.cmp;
+  if (!k) return;
+  const i = state.compare.indexOf(k);
+  if (e.target.checked && i < 0 && state.compare.length < CMP_MAX) state.compare.push(k);
+  else if (!e.target.checked && i >= 0) state.compare.splice(i, 1);
+  render();
+};
+const dropCompare = (k) => { state.compare = state.compare.filter((x) => x !== k); render(); };
+$("cmp-bar").onclick = (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.dataset.rm) dropCompare(b.dataset.rm);
+  else if (b.dataset.act === "clear") { state.compare = []; render(); }
+  else if (b.dataset.act === "open") { cmpDlg.showModal(); renderCompare(); }
+};
+cmpDlg.onclick = (e) => { const b = e.target.closest("button[data-rm]"); if (b) dropCompare(b.dataset.rm); };
+
+// The bar above the table: chips for what is ticked, plus the Compare button. Also refreshes the modal if it is open.
+function renderCompare() {
+  state.compare = state.compare.filter((k) => rowByKey(k)); // a removed car or a city change can drop a row
+  const picked = state.compare.map(rowByKey);
+  $("cmp-bar").innerHTML = !picked.length
+    ? `<span class="muted">Tick 2 to ${CMP_MAX} variants in the table to compare them</span>`
+    : picked.map((r, i) => `<span class="cmp-chip"><span class="cmp-tag">${letter(i)}</span><span class="cmp-chip-name">${esc(r.car)} ${esc(r.variant)}</span>
+        <button type="button" data-rm="${esc(r.key)}" title="Remove" aria-label="Remove ${esc(r.car)} ${esc(r.variant)} from the comparison">✕</button></span>`).join("") +
+      `<button type="button" class="primary" data-act="open"${picked.length < 2 ? " disabled" : ""}>${picked.length < 2 ? "Compare (pick one more)" : `Compare ${picked.length} variants`}</button>
+       <button type="button" data-act="clear">Clear</button>`;
+  if (cmpDlg.open) picked.length < 2 ? cmpDlg.close() : renderCompareModal(picked);
+}
+
+const cmpShow = (v) => (v === null ? '<span class="muted">Not listed</span>' : v === "Yes" ? "✓ Yes" : esc(v));
+const cmpNeg = (v) => v === "No" || v === "None" || v === "Not Tested";
+
+function renderCompareModal(picked) {
+  const n = picked.length, c = compareRows(picked);
+  const sect = (t) => `<tr class="sect"><th colspan="${n + 1}">${t}</th></tr>`;
+  const valRow = (label, vals) => `<tr><th>${esc(label)}</th>${vals.map((v) => `<td${v !== null && cmpNeg(v) ? ' class="neg"' : ""}>${cmpShow(v)}</td>`).join("")}</tr>`;
+  const delta = (d, i) => (i === 0 ? "–" : d == null ? '<span class="muted">n/a</span>' : d === 0 ? "same" : `${d > 0 ? "+" : "−"}${lakh(Math.abs(d))}`);
+  const head = `<thead><tr><th class="corner">Variant</th>${picked.map((r, i) => `<th class="cmp-col">
+      <div class="cmp-head"><span class="cmp-tag">${letter(i)}</span><button type="button" class="cmp-rm" data-rm="${esc(r.key)}" title="Remove from the comparison" aria-label="Remove ${esc(r.car)} ${esc(r.variant)}">✕</button></div>
+      <div class="cmp-car">${esc(r.car)}</div><div class="cmp-var">${esc(r.variant)}</div></th>`).join("")}</tr></thead>`;
+
+  const diffs = ["Engine and gearbox", "Features"].map((sec) => {
+    const items = c.diff.filter((x) => x.section === sec);
+    return items.length ? sect(`Key differences: ${sec.toLowerCase()} (${items.length})`) + items.map((x) => valRow(x.label, x.values)).join("") : "";
+  }).join("");
+  const common = c.common.length
+    ? sect(`In common: all ${n} have (${c.common.length})`) +
+      c.common.map((x) => `<tr class="com"><th>${esc(x.label)}</th><td colspan="${n}">${cmpShow(x.values[0])}</td></tr>`).join("") : "";
+  const neither = c.neither.length
+    ? sect(`None of them have (${c.neither.length})`) + `<tr class="com"><td colspan="${n + 1}" class="neg">${c.neither.map((x) => esc(x.label)).join(", ")}</td></tr>` : "";
+  const unknown = c.unknown.length
+    ? sect(`Not listed for some of them (${c.unknown.length})`) + c.unknown.map((x) => valRow(x.label, x.values)).join("") : "";
+
+  $("cmp-body").innerHTML = `
+    <p class="cmp-note">${n} variants: <b>${c.diff.length}</b> differences, <b>${c.common.length}</b> things in common. Prices are for ${esc(city.name)}.</p>
+    <div class="cmp-scroll"><table class="cmp-table">${head}<tbody>
+      ${sect("Price")}
+      <tr class="price"><th>On-road</th>${c.price.on.map((v) => `<td>${lakh(v)}</td>`).join("")}</tr>
+      <tr class="price"><th>Ex-showroom</th>${c.price.ex.map((v) => `<td>${lakh(v)}</td>`).join("")}</tr>
+      <tr><th>On-road vs ${letter(0)}</th>${c.price.onVsFirst.map((d, i) => `<td>${delta(d, i)}</td>`).join("")}</tr>
+      ${diffs}${common}${neither}${unknown}
+    </tbody></table></div>`;
+}
 
 // ---- export / import / clear: the user's data only ever lives in this browser
 $("export").onclick = () => {

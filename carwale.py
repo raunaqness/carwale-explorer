@@ -87,6 +87,11 @@ def fetch_html(path):
 
 def get_state(path):
     html = fetch_html(path)
+    # Current layout: the state is JSON inside <script type="application/json" id="initial-state">.
+    m = re.search(r'<script[^>]*\bid=["\']initial-state["\'][^>]*>', html)
+    if m:
+        return json.loads(html[m.end():html.index("</script>", m.end())])
+    # Older layout: `window.__INITIAL_STATE__ = {...}` inline.
     i = html.find("window.__INITIAL_STATE__")
     if i < 0:
         raise CarWaleError(f"No embedded data found at {path} (page layout may have changed).")

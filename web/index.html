@@ -38,9 +38,13 @@
 </aside>
 <main>
   <div id="cars" aria-label="Cars"></div>
-  <div id="count" class="muted"></div>
+  <div class="toolbar"><div id="count" class="muted"></div><div id="cmp-bar" aria-label="Compare variants"></div></div>
   <div class="table-wrap"><table id="table"></table></div>
 </main>
+<dialog id="cmp-dialog">
+  <form method="dialog" class="dlg-head"><strong>Compare variants</strong><button>Close</button></form>
+  <div id="cmp-body"></div>
+</dialog>
 <dialog id="add-dialog">
   <form method="dialog" class="dlg-head"><strong>Add a car</strong><button>Close</button></form>
   <input id="q" type="search" placeholder="Search e.g. Hyundai Exter, Tata Nexon" autocomplete="off">
@@ -48,6 +52,7 @@
 </dialog>
 <script src="storage.js"></script>
 <script src="features.js"></script>
+<script src="compare.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
