@@ -25,3 +25,20 @@ const DB = (() => {
   };
 })();
 const readPrefs = () => { try { return JSON.parse(localStorage.getItem("cwx-prefs")) || {}; } catch { return {}; } };
+
+// Facts read from brochures (speaker brand, side-view cameras) ship in seed.json under keys ending "(brochure)".
+// Cars saved in the browser before those existed don't have them, so copy them across by variant id. Returns true if anything was added.
+function addBrochureFacts(car, seedCars) {
+  const twin = seedCars.find((c) => c.id === car.id);
+  if (!twin) return false;
+  const byId = new Map(twin.variants.map((v) => [String(v.id), v]));
+  let changed = false;
+  car.variants.forEach((v) => {
+    const src = byId.get(String(v.id));
+    if (!src) return;
+    Object.entries(src.features || {}).forEach(([k, x]) => {
+      if (k.endsWith("(brochure)") && v.features && v.features[k] === undefined) { v.features[k] = x; changed = true; }
+    });
+  });
+  return changed;
+}

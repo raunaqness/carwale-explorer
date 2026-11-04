@@ -1,6 +1,6 @@
 const $ = (id) => document.getElementById(id);
 const lakh = (n) => (n ? `₹${(n / 1e5).toFixed(2)} L` : "n/a");
-const sel = { transmission: new Set(), fuel: new Set() };
+const sel = { transmission: new Set(), fuel: new Set(), facets: new Map() };
 const hidden = new Set(), collapsed = new Set(); // variant ids hidden entirely / shrunk to a narrow strip
 let car, variants, cityName, cityPrices;
 
@@ -9,7 +9,9 @@ const DUP = new Set(["Seating Capacity", "Drivetrain", "Max Engine Torque", "Tur
 
 async function loadCar(id) {
   let c = (await DB.all()).find((x) => x.id === id);
-  if (!c) c = (await (await fetch("seed.json")).json()).find((x) => x.id === id);
+  const seedCars = await (await fetch("seed.json")).json().catch(() => []);
+  if (!c) c = seedCars.find((x) => x.id === id);
+  else addBrochureFacts(c, seedCars); // older saved copies lack the brochure fields
   return c;
 }
 
@@ -26,10 +28,13 @@ function checkboxes(el, values, set) {
   el.onchange = (e) => { e.target.checked ? set.add(e.target.value) : set.delete(e.target.value); render(); };
 }
 
+const matches = (v) =>
+  (!sel.transmission.size || sel.transmission.has(v.specs["Transmission Type"])) &&
+  (!sel.fuel.size || sel.fuel.has(v.specs["Fuel Type"])) &&
+  passesFacets(v.facets, sel.facets);
+
 function render() {
-  const matching = variants.filter((v) =>
-    (!sel.transmission.size || sel.transmission.has(v.specs["Transmission Type"])) &&
-    (!sel.fuel.size || sel.fuel.has(v.specs["Fuel Type"])));
+  const matching = variants.filter(matches);
   const shown = matching.filter((v) => !hidden.has(v.id));
   const nHidden = matching.length - shown.length;
   $("count").textContent = `${shown.length} of ${variants.length} variants` + (nHidden ? ` (${nHidden} hidden)` : "");
@@ -80,6 +85,7 @@ $("table").onclick = (e) => {
 };
 $("f-variants").onchange = (e) => { e.target.checked ? hidden.delete(e.target.value) : hidden.add(e.target.value); render(); };
 $("show-all").onclick = () => { hidden.clear(); collapsed.clear(); render(); };
+$("hide-all").onclick = () => { variants.forEach((v) => { if (matches(v)) hidden.add(v.id); }); render(); };
 
 async function boot() {
   const id = new URLSearchParams(location.search).get("id") || "";
@@ -100,11 +106,12 @@ async function boot() {
     <div class="muted">${[o.rating ? `★ ${esc(o.rating)}${o.review_count ? ` (${esc(o.review_count)} reviews)` : ""}` : "", esc(o.price_range || ""),
       o.brochure ? `<a href="${esc(o.brochure)}" target="_blank" rel="noopener noreferrer">Brochure (PDF)</a>` : ""].filter(Boolean).join(" · ")}</div></div>`;
 
-  variants = car.variants.map((v) => ({ ...v, id: String(v.id), on: (cityPrices[v.id] || [])[0], ex: (cityPrices[v.id] || [])[1] }))
+  variants = car.variants.map((v) => ({ ...v, id: String(v.id), facets: facetValues(v.features), on: (cityPrices[v.id] || [])[0], ex: (cityPrices[v.id] || [])[1] }))
     .sort((a, b) => (a.on ?? Infinity) - (b.on ?? Infinity) || a.variant.localeCompare(b.variant));
   const uniq = (f) => [...new Set(variants.map(f).filter(Boolean))].sort();
   checkboxes($("f-transmission"), uniq((v) => v.specs["Transmission Type"]), sel.transmission);
   checkboxes($("f-fuel"), uniq((v) => v.specs["Fuel Type"]), sel.fuel);
+  renderFacets($("f-facets"), variants.map((v) => v.facets), sel.facets, render);
   render();
 }
 boot();

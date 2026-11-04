@@ -1,0 +1,46 @@
+{
+  "_about": "Facts read from each car's brochure.pdf (text extracted with pypdf) that CarWale's per-variant data does not have: the speaker brand and side-view cameras. scripts/build_seed.py copies them into each variant's `features` under the key names below. A rule matches a variant by name (`variant` regex) or by a CarWale feature (`feature`: [key, value]); the last matching rule wins, otherwise `default`. `expect` is a consistency check against CarWale's own data: the build fails if a matched variant disagrees. Brand-less speakers are 'No brand named' because the brochure says nothing about the maker, not because it has proven they are generic. Brochure grids are only read where the column-to-variant mapping could be confirmed against CarWale. Cars not listed here, and anything the brochure does not say, show as 'Not listed'.",
+
+  "hyundai-venue": {
+    "source": "Brochure p.19, 'Key features' grid. 'Bose premium sound 8 speaker system', 'Surround View Monitor (SVM)', 'Blind Spot View Monitor (BVM)' and front/side parking sensors are ticked only in the last two columns. CarWale gives the 360-degree camera, 8 speakers and front/rear/side sensors to exactly the HX 10 trims, so that is the mapping used.",
+    "fields": {
+      "Speaker system (brochure)": {
+        "default": "No brand named",
+        "rules": [{ "variant": "^HX 10\\b", "value": "Bose", "expect": ["Speakers", "8"] }]
+      },
+      "Side-view camera (brochure)": {
+        "default": "None",
+        "rules": [{ "variant": "^HX 10\\b", "value": "Blind spot view monitor", "expect": ["Parking Assist", "360 Degree Camera"] }]
+      }
+    }
+  },
+
+  "honda-amaze": {
+    "source": "Brochure p.35-36 grid (V, VX, ZX): 'LaneWatch Camera - O O' (left-side camera, on VX and ZX); speakers '4 / 6 (4+2) / 6 (4+2)'. The brochure names no speaker brand. VX and ZX are the variants CarWale lists with a rear camera and 6 speakers.",
+    "fields": {
+      "Speaker system (brochure)": { "default": "No brand named", "rules": [] },
+      "Side-view camera (brochure)": {
+        "default": "None",
+        "rules": [{ "variant": "^(VX|ZX)\\b", "value": "LaneWatch camera", "expect": ["Parking Assist", "Reverse Camera with Guidance"] }]
+      }
+    }
+  },
+
+  "skoda-kylaq": {
+    "source": "Brochure p.24 equipment list: 'Front & rear speakers (4 nos.)', 'Front tweeter (2 nos.)', 'Rear View Camera with static guidelines'. No speaker brand and no side or blind-spot camera appear anywhere in the text.",
+    "fields": {
+      "Speaker system (brochure)": { "default": "No brand named", "skip_if": ["Speakers", "No"], "rules": [] },
+      "Side-view camera (brochure)": { "default": "None", "rules": [] }
+    }
+  },
+
+  "kia-sonet": {
+    "source": "Brochure p.4 'Bose Premium 7-speaker System'. The brochure does not say which trims have it, but CarWale lists a 7-speaker system on exactly 5 variants (GTX Plus and X Line) and no other variant has 7, so Bose is assigned to those. The brochure also lists a Blind View Monitor (BVM) and 360 Degree Camera without saying which trims; the BVM is therefore left as 'Not listed'.",
+    "fields": {
+      "Speaker system (brochure)": {
+        "default": "No brand named",
+        "rules": [{ "feature": ["Speakers", "7"], "value": "Bose" }]
+      }
+    }
+  }
+}

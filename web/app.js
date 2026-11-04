@@ -8,7 +8,7 @@ const CORE = [
   { key: "power", label: "Power" },
   { key: "brochure", label: "Brochure" },
 ];
-const state = { cars: new Set(), gearbox: new Set(), fuel: new Set(), features: new Set(), hidden: new Set(), maxPrice: 0, sort: { key: "on_road", dir: 1 } };
+const state = { cars: new Set(), gearbox: new Set(), fuel: new Set(), features: new Set(), facets: new Map(), hidden: new Set(), maxPrice: 0, sort: { key: "on_road", dir: 1 } };
 let rows = [], cars = [], saved = [], cityList = [];
 let city = { slug: "bangalore", name: "Bangalore" };
 const $ = (id) => document.getElementById(id);
@@ -42,13 +42,13 @@ function buildRows() {
     for (const v of car.variants) {
       const s = v.specs || {}, features = {};
       for (const [k, x] of Object.entries(v.features || {})) {
-        if (!SKIP.has(k) && !HIDE.has(x)) features[k] = x === "Yes" || FLAG_ONLY.has(k) ? "Yes" : x;
+        if (!SKIP.has(k) && !FACET_FIELDS.has(k) && !HIDE.has(x)) features[k] = x === "Yes" || FLAG_ONLY.has(k) ? "Yes" : x;
       }
       const p = prices[v.id];
       out.push({ key: `${car.id}:${v.id}`, car: car.overview.name, variant: v.variant,
         on_road: p ? p[0] : null, ex_showroom: p ? p[1] : null,
         fuel: s["Fuel Type"], gearbox: s["Transmission Type"], power: s["Max Engine Power"],
-        brochure: car.overview.brochure || null, features });
+        brochure: car.overview.brochure || null, features, facets: facetValues(v.features) });
     }
   }
   return out;
@@ -144,8 +144,9 @@ function init() {
   const counts = {};
   rows.forEach((r) => Object.keys(r.features).forEach((k) => (counts[k] = (counts[k] || 0) + 1)));
   checkboxes($("f-feature"), Object.keys(counts).sort(), state.features);
+  renderFacets($("f-facets"), rows.map((r) => r.facets), state.facets, render);
   $("reset").onclick = () => {
-    [state.cars, state.gearbox, state.fuel, state.features, state.hidden].forEach((s) => s.clear());
+    [state.cars, state.gearbox, state.fuel, state.features, state.hidden, ...state.facets.values()].forEach((s) => s.clear());
     document.querySelectorAll("#filters input[type=checkbox]").forEach((c) => (c.checked = false));
     range.value = range.max; state.maxPrice = +range.max; prefs.save(); render();
   };
@@ -226,14 +227,15 @@ function render() {
   const shown = rows.filter((r) =>
     match(state.cars, r.car) && !state.hidden.has(r.car) && match(state.gearbox, gearGroup(r.gearbox)) && match(state.fuel, r.fuel) &&
     (!r.on_road || r.on_road <= state.maxPrice) &&
-    [...state.features].every((f) => r.features[f]));
+    [...state.features].every((f) => r.features[f]) && passesFacets(r.facets, state.facets));
   const { key, dir } = state.sort;
-  const val = (r) => (key in r ? r[key] : r.features[key]) ?? (key === "on_road" || key === "ex_showroom" ? Infinity : "");
+  const val = (r) => (key in r ? r[key] : key.startsWith("facet:") ? r.facets[key.slice(6)] : r.features[key]) ?? (key === "on_road" || key === "ex_showroom" ? Infinity : "");
   shown.sort((a, b) => {
     const x = val(a), y = val(b);
     return (typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y))) * dir;
   });
-  const cols = [...CORE, ...[...state.features].sort().map((f) => ({ key: f, label: f, feat: true }))];
+  const facetCols = FACETS.filter((f) => (state.facets.get(f.id) || new Set()).size).map((f) => ({ key: "facet:" + f.id, label: f.label, facet: f.id }));
+  const cols = [...CORE, ...facetCols, ...[...state.features].sort().map((f) => ({ key: f, label: f, feat: true }))];
   $("count").textContent = `${shown.length} of ${rows.length} variants`;
   $("table").innerHTML =
     `<thead><tr>${cols.map((c) => `<th data-k="${c.key}">${esc(c.label)}${key === c.key ? (dir > 0 ? " ▲" : " ▼") : ""}</th>`).join("")}</tr></thead>` +
@@ -245,6 +247,7 @@ function render() {
 }
 
 function cell(r, c) {
+  if (c.facet) return `<td>${esc(r.facets[c.facet])}</td>`;
   if (c.feat) {
     const v = r.features[c.key];
     return `<td class="${v === "Yes" ? "yes" : ""}">${v === "Yes" ? "✓" : esc(v)}</td>`;
@@ -288,6 +291,10 @@ async function boot() {
       localStorage.setItem("cwx-seeded", "1");
     }
   } catch (e) { $("count").textContent = "Could not open browser storage: " + e.message; return; }
+  try {
+    const seedCars = await (await fetch("seed.json")).json();
+    for (const c of saved) if (addBrochureFacts(c, seedCars)) await DB.put(c);
+  } catch (e) { /* offline or no seed: the brochure filters just show "Not listed" */ }
   const p = prefs.get();
   (p.hidden || []).forEach((n) => state.hidden.add(n));
   if (p.city) city = { slug: p.city, name: p.city };

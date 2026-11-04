@@ -13,10 +13,14 @@
   <p class="muted" id="subtitle"></p>
   <fieldset><legend>Transmission</legend><div id="f-transmission"></div></fieldset>
   <fieldset><legend>Engine / fuel type</legend><div id="f-fuel"></div></fieldset>
+  <fieldset><legend>Features</legend><div id="f-facets"></div></fieldset>
   <fieldset>
     <legend>Variants</legend>
     <p class="muted">Untick to hide a column. Use the ◂ / ✕ buttons in a column header to collapse or hide it.</p>
-    <button id="show-all" type="button">Show all / expand all</button>
+    <div class="var-actions">
+      <button id="show-all" type="button">Show all / expand all</button>
+      <button id="hide-all" type="button">Hide all</button>
+    </div>
     <div id="f-variants"></div>
   </fieldset>
 </aside>
@@ -27,6 +31,7 @@
   <p id="msg" class="muted"></p>
 </main>
 <script src="storage.js"></script>
+<script src="features.js"></script>
 <script src="car.js"></script>
 </body>
 </html>

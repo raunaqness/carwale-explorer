@@ -43,3 +43,7 @@ Designed in, not built yet:
   `/api/ask`, and a monthly spend limit on the OpenRouter key. If the container filesystem stays
   read-only this needs no other change. Note that the question and context pass through the server
   and OpenRouter, so the privacy note should say so.
+
+## Deploying updates
+
+Commit your changes on `main`, then run `scripts/deploy.sh` from your machine. It pushes, updates the VPS over SSH, rebuilds the container and checks the site. Nothing is stored on any other server. Use `--no-push` if the code is already on GitHub.
